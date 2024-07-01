@@ -51,5 +51,4 @@ Fora do trabalho, eu gosto de jogar Valorant e sair para shows e festivais 🎶�
 
 ## Contato 📫
 - **Email:** jodivockt@gmail.com
-- **LinkedIn:** [Jodi Vockt](https://www.linkedin.com/in/jodi-vockt-a7b83b116/)
 - **GitHub:** [Jodixx](https://github.com/Jodixx)
