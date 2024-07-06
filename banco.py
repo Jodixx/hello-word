@@ -2,18 +2,18 @@
 #saque = 0 #realizar 3 saques diarios com limite de 500 se n tiver conta informar mensagem valores armazenados em extrado
 #extrato = #exibir salto atual e valores de deposito e saque RS000,00
 
-# Listas para armazenar usuários e contas
+
 usuarios = []
 contas_correntes = []
 numero_sequencial = 1
 
 def cadastrar_cliente(nome, data_nascimento, cpf, endereco):
-    # Validar CPF (somente números e único)
+    
     if not cpf.isdigit() or any(usuario['cpf'] == cpf for usuario in usuarios):
         print("CPF inválido ou já cadastrado.")
         return False
     
-    # Adicionar cliente à lista de usuários
+    
     usuarios.append({
         'nome': nome,
         'data_nascimento': data_nascimento,
@@ -26,13 +26,13 @@ def cadastrar_cliente(nome, data_nascimento, cpf, endereco):
 def criar_conta_corrente(cpf_usuario):
     global numero_sequencial
 
-    # Verificar se o usuário existe
+    
     usuario = next((usuario for usuario in usuarios if usuario['cpf'] == cpf_usuario), None)
     if not usuario:
         print("Usuário não encontrado.")
         return False
     
-    # Criar nova conta corrente
+    
     conta = {
         'agencia': '0001',
         'numero_conta': numero_sequencial,
@@ -70,7 +70,7 @@ def exibir_extrato(*, saldo, extrato):
         print(transacao)
     print(f"\nSaldo atual: R${saldo:.2f}")
 
-# Função principal com menu interativo
+
 def main():
     saldo = 0
     limite = 500
@@ -113,12 +113,12 @@ def main():
         else:
             print("Operação inválida, por favor selecione novamente a operação desejada.")
 
-# Exemplos de uso das funções de cadastro e criação de conta
+
 cadastrar_cliente("João Silva", "01/01/1980", "12345678901", "Rua A, 100-Centro-Cidade/SP")
 cadastrar_cliente("Maria Souza", "15/05/1990", "98765432100", "Av B, 200-Bairro-Cidade/SP")
 
 criar_conta_corrente("12345678901")
 criar_conta_corrente("98765432100")
 
-# Chamar a função principal
+
 main()
