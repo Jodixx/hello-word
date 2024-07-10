@@ -1,6 +1,5 @@
-from abc import ABC, abstractclassmethod, abstractproperty
-from datetime import datetime
-
+from abc import ABC, abstractmethod
+from datetime import datetime, date
 
 class Cliente:
     def __init__(self, endereco):
@@ -8,7 +7,12 @@ class Cliente:
         self.contas = []
 
     def realizar_transacao(self, conta, transacao):
-        transacao.registrar(conta)
+        # Verifica se o limite diário de transações foi excedido
+        if conta.excedeu_limite_diario():
+            print("\n@@@ Operação falhou! Limite diário de transações excedido. @@@")
+        else:
+            transacao.registrar(conta)
+            conta.registrar_transacao()
 
     def adicionar_conta(self, conta):
         self.contas.append(conta)
@@ -29,6 +33,8 @@ class Conta:
         self._agencia = "0001"
         self._cliente = cliente
         self._historico = Historico()
+        self._transacoes_diarias = []
+        self._limite_transacoes_diarias = 10
 
     @classmethod
     def nova_conta(cls, cliente, numero):
@@ -81,6 +87,20 @@ class Conta:
 
         return True
 
+    def excedeu_limite_diario(self):
+        # Verifica se o número de transações diárias excedeu o limite
+        hoje = date.today()
+        transacoes_hoje = sum(1 for t in self._transacoes_diarias if t.date() == hoje)
+        return transacoes_hoje >= self._limite_transacoes_diarias
+
+    def registrar_transacao(self):
+        # Registra a data e hora da transação no histórico
+        self._historico.adicionar_transacao(datetime.now())
+
+    def adicionar_transacao_diaria(self, transacao):
+        # Adiciona a transação à lista de transações diárias
+        self._transacoes_diarias.append(transacao)
+
 
 class ContaCorrente(Conta):
     def __init__(self, numero, cliente, limite=500, limite_saques=3):
@@ -95,6 +115,7 @@ class ContaCorrente(Conta):
 
         excedeu_limite = valor > self.limite
         excedeu_saques = numero_saques >= self.limite_saques
+        excedeu_limite_diario = self.excedeu_limite_diario()
 
         if excedeu_limite:
             print("\n@@@ Operação falhou! O valor do saque excede o limite. @@@")
@@ -102,6 +123,9 @@ class ContaCorrente(Conta):
         elif excedeu_saques:
             print("\n@@@ Operação falhou! Número máximo de saques excedido. @@@")
 
+        elif excedeu_limite_diario:
+            print("\n@@@ Operação falhou! Limite diário de transações excedido. @@@")
+        
         else:
             return super().sacar(valor)
 
@@ -124,22 +148,19 @@ class Historico:
         return self._transacoes
 
     def adicionar_transacao(self, transacao):
-        self._transacoes.append(
-            {
-                "tipo": transacao.__class__.__name__,
-                "valor": transacao.valor,
-                "data": datetime.now().strftime("%d-%m-%Y %H:%M:%s"),
-            }
-        )
+        self._transacoes.append(transacao)
+
+    def __str__(self):
+        return "\n".join([f" - {transacao}" for transacao in self.transacoes])
 
 
 class Transacao(ABC):
     @property
-    @abstractproperty
+    @abstractmethod
     def valor(self):
         pass
 
-    @abstractclassmethod
+    @abstractmethod
     def registrar(self, conta):
         pass
 
@@ -157,6 +178,7 @@ class Saque(Transacao):
 
         if sucesso_transacao:
             conta.historico.adicionar_transacao(self)
+            conta.adicionar_transacao_diaria(self)
 
 
 class Deposito(Transacao):
@@ -172,3 +194,5 @@ class Deposito(Transacao):
 
         if sucesso_transacao:
             conta.historico.adicionar_transacao(self)
+            conta.adicionar_transacao_diaria(self)
+
